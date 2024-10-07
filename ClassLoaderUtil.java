@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public final class ClassLoaderUtil {
-    public static ClassLoader classLoader;
     private ClassLoaderUtil() {
         // Hide constructor
     }
@@ -20,12 +19,13 @@ public final class ClassLoaderUtil {
 
     public static Object loadClass(final ClassLoader classLoader, final String className, final Object... args) throws Exception {
         final Class<?> clazz = classLoader.loadClass(className);
-        final List<Constructor<?>> constructorList = Arrays.stream(clazz.getConstructors()).collect(Collectors.toList());
+        final List<Constructor<?>> constructorList = Arrays.stream(clazz.getDeclaredConstructors()).collect(Collectors.toList());
         for(final Constructor<?> constructor : constructorList) {
             if (checkNonEqualArgs(classLoader, args, constructor.getParameters())) {
                 continue;
             }
 
+            constructor.setAccessible(true);
             return constructor.newInstance(args);
         }
 
